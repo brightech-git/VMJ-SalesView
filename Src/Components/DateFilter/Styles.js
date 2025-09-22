@@ -1,0 +1,45 @@
+import { StyleSheet,Platform } from 'react-native';
+
+export default StyleSheet.create({
+  input: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1F2937',
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+  container: {
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  separator: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginHorizontal: 12,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+  },
+});
