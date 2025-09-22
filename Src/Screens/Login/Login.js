@@ -42,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
         style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome to JAIGURU Jewellers</Text>
+          <Text style={styles.title}>Welcome to Vairamaaligai Jewellers</Text>
           <Text style={styles.subtitle}>
             Sign in to access your exclusive jewelry collection
           </Text>

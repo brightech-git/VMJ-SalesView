@@ -2,69 +2,40 @@ import React, { useEffect, useContext } from "react";
 import { View, Text, StyleSheet, I18nManager } from "react-native";
 import { usePaymentData } from "../../Contexts/Payment/PaymentContext";
 import { formatIN } from "../../Config/Rupees";
-import { useSchemeSummary } from "../../Contexts/SchemeAdjustment/SchemeAdjustmentContext";
 import { CostCentreContext } from "../../Contexts/CostCenter/CostCenterContext";
 
-
 export default function PaymentItemCard({ costId, startDate, endDate, onData }) {
-  const { cash, credit, upi, cheque } = usePaymentData({
+  const { cash, credit, chequeAndUPI, total } = usePaymentData({
     costId,
     startDate,
     endDate,
   });
-
   const { getCostName } = useContext(CostCentreContext);
 
-  // ✅ Call hook before using schemeAmount
-  const { schemeAmount } = useSchemeSummary({
-    costId,
-    startDate,
-    endDate,
-  });
-
-  // ✅ Safe total calculation
-  const total = (cash || 0) + (credit || 0) + (upi || 0) + (cheque || 0) + (schemeAmount || 0);
-
-  // ✅ Send all data at once
   useEffect(() => {
     if (onData) {
-      onData({
-        schemeAmount,
-        cash,
-        credit,
-        upi,
-        cheque,
-      });
+      onData({ cash, credit, chequeAndUPI, total });
     }
-  }, [schemeAmount, cash, credit, upi, cheque]);
+  }, [cash, credit, chequeAndUPI, total]);
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{getCostName(costId)}</Text>
+      <Text style={styles.title}>Payment Summary</Text>
       <View style={styles.table}>
-        {/* Header */}
         <View style={styles.rowHeader}>
-          <Text style={styles.cellHeader1}>Payment Mode</Text>
-          <Text style={styles.cellHeader2}>Amount (₹)</Text>
+          <Text style={styles.cellHeader}>Mode</Text>
+          <Text style={styles.cellHeader}>Amount (₹)</Text>
         </View>
-
-        {/* Rows (only show if > 0) */}
         {[
           ["Cash", cash],
           ["Credit/Debit Card", credit],
-          ["Cheque", upi],
-          ["Upi", cheque], 
-          ["Scheme Adjust", schemeAmount]
-        ]
-          .filter(([_, value]) => (value || 0) > 0)
-          .map(([label, value]) => (
-            <View key={label} style={styles.row}>
-              <Text style={styles.cellLabel}>{label}</Text>
-              <Text style={styles.cellValue}>{formatIN(value)}</Text>
-            </View>
-          ))}
-
-        {/* Total */}
+          ["Cheque/UPI", chequeAndUPI],
+        ].map(([label, value]) => (
+          <View key={label} style={styles.row}>
+            <Text style={styles.cellLabel}>{label}</Text>
+            <Text style={styles.cellValue}>{formatIN(value)}</Text>
+          </View>
+        ))}
         <View style={styles.totalRow}>
           <Text style={[styles.cellLabel, styles.boldText]}>Total</Text>
           <Text style={[styles.cellValue, styles.boldText]}>
@@ -78,8 +49,7 @@ export default function PaymentItemCard({ costId, startDate, endDate, onData }) 
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 2,
-    padding: 12,
+    marginBottom: 16,
     borderRadius: 10,
     backgroundColor: "#fff",
     borderColor: "#ccc",
@@ -92,7 +62,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingVertical: 12,
     color: "#222",
-    letterSpacing: 0.5,
   },
   table: {
     borderTopWidth: 1,
@@ -118,17 +87,10 @@ const styles = StyleSheet.create({
     borderColor: "#999",
     backgroundColor: "#f9f9f9",
   },
-  cellHeader1: {
+  cellHeader: {
     flex: 1,
     fontWeight: "600",
-    textAlign: "left",
-    color: "#555",
-    fontSize: 15,
-  },
-  cellHeader2: {
-    flex: 1,
-    fontWeight: "600",
-    textAlign: "right",
+    textAlign: "center",
     color: "#555",
     fontSize: 15,
   },

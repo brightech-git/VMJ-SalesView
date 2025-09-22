@@ -1,9 +1,8 @@
-// Contexts/CancelBill/useCancelBillData.js
-import { useEffect, useState } from 'react';
-import { Api_Base_url } from '../../Config/Config';
+import { useEffect, useState } from "react";
+import { Api_Base_url2 } from "../../Config/Config";
 
-// ✅ 1. React Hook for real-time cancel bill data (UI components)
-export function useCancelBillData({ startDate, endDate, costId }) {
+// ✅ Hook to fetch cancel bill data (no costId)
+export function useCancelBillData({ startDate, endDate }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -11,16 +10,19 @@ export function useCancelBillData({ startDate, endDate, costId }) {
     let isMounted = true;
 
     const fetchCancelBills = async () => {
-      if (!startDate || !endDate || !costId) return;
+      if (!startDate || !endDate) return;
       try {
-        const url = `${Api_Base_url}${costId}BillCancel?startDate=${startDate}&endDate=${endDate}&costId=${costId}`;
+        const url = `${Api_Base_url2}billCancel?startDate=${startDate}&endDate=${endDate}`;
         const response = await fetch(url);
         const json = await response.json();
+
+        // console.log("✅ Cancel Bill API Response:", json); // 👉 LOG HERE
+
         if (isMounted) {
           setData(Array.isArray(json) ? json : []);
         }
       } catch (error) {
-        console.error(`Error fetching cancel bills for ${costId}:`, error);
+        console.error(`❌ Error fetching cancel bills:`, error);
         if (isMounted) setData([]);
       } finally {
         if (isMounted) setLoading(false);
@@ -34,20 +36,23 @@ export function useCancelBillData({ startDate, endDate, costId }) {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [startDate, endDate, costId]);
+  }, [startDate, endDate]);
 
   return { data, loading };
 }
 
-// ✅ 2. Non-hook function for direct use (e.g., PDF generation)
-export async function getCancelBillData({ startDate, endDate, costId }) {
+// ✅ Non-hook version (for background/export use)
+export async function getCancelBillData({ startDate, endDate }) {
   try {
-    const url = `${Api_Base_url}${costId}BillCancel?startDate=${startDate}&endDate=${endDate}&costId=${costId}`;
+    const url = `${Api_Base_url2}billCancel?startDate=${startDate}&endDate=${endDate}`;
     const response = await fetch(url);
     const json = await response.json();
+
+    // console.log("📦 getCancelBillData response:", json); // 👉 LOG HERE
+
     return Array.isArray(json) ? json : [];
   } catch (error) {
-    console.error(`Error fetching cancel bills for ${costId}:`, error);
+    console.error(`❌ Error fetching cancel bills:`, error);
     return [];
   }
 }

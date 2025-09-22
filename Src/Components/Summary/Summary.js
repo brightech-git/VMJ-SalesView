@@ -1,16 +1,17 @@
+// ✅ File: Components/Summary/SummaryItemCard.js
 import React, { useEffect, useContext } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSummaryData } from '../../Contexts/Summary/SummaryContext';
-import { CostCentreContext } from "../../Contexts/CostCenter/CostCenterContext";
 
-export default function SummaryItemCard({ costId, startDate, endDate, onData }) {
+import { formatIN } from "../../Config/Rupees";
+
+export default function SummaryItemCard({  startDate, endDate, onData }) {
   const { TotalEstimate, TotalBilled, TotalPending } = useSummaryData({
     startDate,
     endDate,
-    costId,
   });
 
-  const { getCostName } = useContext(CostCentreContext);
+
 
   useEffect(() => {
     if (onData) {
@@ -24,7 +25,7 @@ export default function SummaryItemCard({ costId, startDate, endDate, onData }) 
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{getCostName(costId)}</Text>
+      <Text style={styles.title}>Estimation Summary</Text>
 
       <View style={styles.table}>
         <View style={[styles.row, styles.headerRow]}>
@@ -34,9 +35,9 @@ export default function SummaryItemCard({ costId, startDate, endDate, onData }) 
         </View>
 
         <View style={styles.row}>
-          <Text style={styles.cell}>{TotalEstimate}</Text>
-          <Text style={styles.cell}>{TotalBilled}</Text>
-          <Text style={styles.cell}>{TotalPending}</Text>
+          <Text style={styles.cell}>{formatIN(TotalEstimate)}</Text>
+          <Text style={styles.cell}>{formatIN(TotalBilled)}</Text>
+          <Text style={styles.cell}>{formatIN(TotalPending)}</Text>
         </View>
       </View>
     </View>
@@ -51,6 +52,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 3,
   },
   title: {
     backgroundColor: "#C0C0C0",

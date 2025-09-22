@@ -1,17 +1,13 @@
+// ✅ File: Components/Scheme/SchemeSummaryCard.js
 import React, { useEffect, useContext } from "react";
 import { View, Text, StyleSheet, I18nManager } from "react-native";
 import { useSchemeSummary } from "../../Contexts/SchemeAdjustment/SchemeAdjustmentContext";
 import { formatIN } from "../../Config/Rupees";
 import { colors } from "../../Utills/colors";
-import { FontFamily, FontSize } from "../../Utills/Global_Styles";
-import { CostCentreContext } from "../../Contexts/CostCenter/CostCenterContext";
+import { FontFamily } from "../../Utills/Global_Styles";
 
-export default function SchemeSummaryCard({
-  costId,
-  startDate,
-  endDate,
-  onData,
-}) {
+
+export default function SchemeSummaryCard({ costId, startDate, endDate, onData }) {
   const {
     collectionAmount,
     collectionWeight,
@@ -19,7 +15,8 @@ export default function SchemeSummaryCard({
     adjustmentWeight,
     schemeAmount,
   } = useSchemeSummary({ startDate, endDate, costId });
-  const { getCostName } = useContext(CostCentreContext);
+
+
 
   useEffect(() => {
     if (onData) {
@@ -41,25 +38,20 @@ export default function SchemeSummaryCard({
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{getCostName(costId)}</Text>
+      <Text style={styles.title}>SchemeAdjustment Summary</Text>
 
       <View style={styles.table}>
-        {/* Header Row */}
         <View style={styles.headerRow}>
           <Text style={styles.headerCell}>Metric</Text>
           <Text style={styles.headerCell}>Value</Text>
         </View>
 
-        {[
+        {[ 
           { label: "Collection Amount", value: formatIN(collectionAmount) },
           { label: "Collection Weight", value: `${collectionWeight} g` },
           { label: "Adjustment Amount", value: formatIN(adjustmentAmount) },
           { label: "Adjustment Weight", value: `${adjustmentWeight} g` },
-          {
-            label: "Scheme Adjustment",
-            value: formatIN(schemeAmount),
-            bold: true,
-          },
+          { label: "Scheme Adjustment", value: formatIN(schemeAmount), bold: true }
         ].map(({ label, value, bold }, idx) => (
           <View key={idx} style={styles.dataRow}>
             <Text style={[styles.cellLabel, bold && styles.bold]}>{label}</Text>

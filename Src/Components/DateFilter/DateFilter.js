@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+// import { generatePDFReport } from "../../Utills/GeneratePdf";
 import { FontFamily, FontSize, Border } from '../../Utills/Global_Styles';
 import { colors } from '../../Utills/colors';
-import MultiCostDropdown from '../MultiCostDropdown/MultiCostDropdown'; 
+
 export default function DateFilter({
   startDate,
   setStartDate,
@@ -21,17 +21,12 @@ export default function DateFilter({
   setStartPickerVisible,
   isEndPickerVisible,
   setEndPickerVisible,
+  onPrintPress // <-- NEW PROP
 }) {
   const handleStartChange = (event, selectedDate) => {
     setStartPickerVisible(false);
     if (selectedDate) {
-      const isoDate = selectedDate.toISOString().split('T')[0];
-      setStartDate(isoDate);
-
-      // ✅ Auto-adjust end date if it's before new start date
-      if (new Date(isoDate) > new Date(endDate)) {
-        setEndDate(isoDate);
-      }
+      setStartDate(selectedDate.toISOString().split('T')[0]);
     }
   };
 
@@ -67,12 +62,7 @@ export default function DateFilter({
             </TouchableOpacity>
           </View>
 
-          <Icon
-            name="arrow-forward-ios"
-            size={16}
-            color={colors.fontThirdColor}
-            style={styles.arrow}
-          />
+          <Icon name="arrow-forward-ios" size={16} color={colors.fontThirdColor} style={styles.arrow} />
 
           <View style={styles.dateBlock}>
             <TouchableOpacity
@@ -85,6 +75,9 @@ export default function DateFilter({
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* PDF Export Button */}
+   
       </View>
 
       {/* Date Pickers */}
@@ -95,7 +88,6 @@ export default function DateFilter({
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleStartChange}
           themeVariant="light"
-          maximumDate={new Date()} // ✅ restrict to today or earlier
         />
       )}
 
@@ -106,8 +98,6 @@ export default function DateFilter({
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleEndChange}
           themeVariant="light"
-          minimumDate={new Date(startDate)} // ✅ cannot pick before start date
-          maximumDate={new Date()} // ✅ cannot pick after today
         />
       )}
     </View>
@@ -155,5 +145,21 @@ const styles = StyleSheet.create({
   },
   arrow: {
     paddingHorizontal: 10,
+  },
+  printButton: {
+    marginLeft: 12,
+    padding: 12,
+    backgroundColor: colors.primaryGold,
+    borderRadius: Border.br_md,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  printButtonText: {
+    fontSize: 18,
+    color: colors.white,
+    fontWeight: 'bold',
   },
 });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-import { Api_Rate_url } from '../../Config/Config';
+import { Api_Rate_url2 } from '../../Config/Config';
 import { FontFamily, FontSize, Border } from '../../Utills/Global_Styles';
 import {colors} from "../../Utills/colors"
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -50,10 +50,10 @@ export default function RateSection() {
 
   const fetchRates = async () => {
     try {
-      const response = await fetch(`${Api_Rate_url}`);
+      const response = await fetch(`${Api_Rate_url2}`);
       const data = await response.json();
-      setGoldRate(data.GOLDRATE || 0);
-      setSilverRate(data.SILVERRATE || 0);
+      setGoldRate(data.G || 0);
+      setSilverRate(data.S || 0);
     } catch (error) {
       console.error('Error fetching rates:', error);
       setGoldRate(0);

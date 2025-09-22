@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "myapp",
-    "slug": "VMJ-SalesView",
+    "name": "VMJ-SalesView",
+    "slug": "vmj-salesview",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,14 +21,14 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.kiruba08.VMJSalesView"
+      "package": "com.vmj.vmj"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "b203dcc5-1d97-4940-bd09-51ec839944c7"
+        "projectId": "5718bf97-9920-4310-ac3e-cfe035c1f9c4"
       }
     },
     "owner": "kiruba08"

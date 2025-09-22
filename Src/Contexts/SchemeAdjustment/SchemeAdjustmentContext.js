@@ -1,7 +1,7 @@
+// ✅ File: Contexts/SchemeAdjustment/SchemeAdjustmentContext.js
 import { useState, useEffect } from "react";
-import { Api_Base_url } from "../../Config/Config";
+import { Api_Base_url2 } from "../../Config/Config";
 
-// React Hook — For UI Components
 export function useSchemeSummary({ startDate, endDate, costId }) {
   const [collectionAmount, setCollectionAmount] = useState(0);
   const [collectionWeight, setCollectionWeight] = useState(0);
@@ -31,7 +31,8 @@ export function useSchemeSummary({ startDate, endDate, costId }) {
 
   const fetchCollection = async () => {
     try {
-      const res = await fetch(`${Api_Base_url}${costId}collection?startDate=${startDate}&endDate=${endDate}&costId=${costId}`);
+      const url = `${Api_Base_url2}collection?startDate=${startDate}&endDate=${endDate}`;
+      const res = await fetch(url);
       const data = await res.json();
       setCollectionAmount(data?.COLLECTIONAMOUNT || 0);
       setCollectionWeight(data?.COLLECTIONWEIGHT || 0);
@@ -43,7 +44,8 @@ export function useSchemeSummary({ startDate, endDate, costId }) {
 
   const fetchAdjustment = async () => {
     try {
-      const res = await fetch(`${Api_Base_url}${costId}AdjustmentWeightAmount?startDate=${startDate}&endDate=${endDate}&costId=${costId}`);
+      const url = `${Api_Base_url2}AdjustmentWeightAmount?startDate=${startDate}&endDate=${endDate}`;
+      const res = await fetch(url);
       const data = await res.json();
       setAdjustmentAmount(data?.ADJAMOUNT || 0);
       setAdjustmentWeight(data?.ADJWEIGHT || 0);
@@ -55,7 +57,8 @@ export function useSchemeSummary({ startDate, endDate, costId }) {
 
   const fetchScheme = async () => {
     try {
-      const res = await fetch(`${Api_Base_url}${costId}SchemeAdjustment?startDate=${startDate}&endDate=${endDate}`);
+      const url = `${Api_Base_url2}SchemeAdjustment?startDate=${startDate}&endDate=${endDate}`;
+      const res = await fetch(url);
       const data = await res.json();
       console.log(data)
       setSchemeAmount(data?.Amount || 0);
@@ -73,33 +76,32 @@ export function useSchemeSummary({ startDate, endDate, costId }) {
   };
 }
 
-// Pure Function — For External Use (e.g. PDF)
-export async function getSchemeSummaryData({ startDate, endDate, costId }) {
+export async function getSchemeSummaryData({ startDate, endDate }) {
   try {
-    const [adjustmentRes, collectionRes, schemeRes] = await Promise.all([
-      fetch(`${Api_Base_url}${costId}AdjustmentWeightAmount?startDate=${startDate}&endDate=${endDate}&costId=${costId}`),
-      fetch(`${Api_Base_url}${costId}collection?startDate=${startDate}&endDate=${endDate}&costId=${costId}`),
-      fetch(`${Api_Base_url}${costId}SchemeAdjustment?startDate=${startDate}&endDate=${endDate}&costId=${costId}`),
+    const [collectionRes, adjustmentRes, schemeRes] = await Promise.all([
+      fetch(`${Api_Base_url2}collection?startDate=${startDate}&endDate=${endDate}`),
+      fetch(`${Api_Base_url2}AdjustmentWeightAmount?startDate=${startDate}&endDate=${endDate}`),
+      fetch(`${Api_Base_url2}SchemeAdjustment?startDate=${startDate}&endDate=${endDate}`),
     ]);
 
-    const adjustment = await adjustmentRes.json();
     const collection = await collectionRes.json();
+    const adjustment = await adjustmentRes.json();
     const scheme = await schemeRes.json();
 
     return {
-      adjustmentAmount: adjustment?.ADJAMOUNT || 0,
-      adjustmentWeight: adjustment?.ADJWEIGHT || 0,
       collectionAmount: collection?.COLLECTIONAMOUNT || 0,
       collectionWeight: collection?.COLLECTIONWEIGHT || 0,
+      adjustmentAmount: adjustment?.ADJAMOUNT || 0,
+      adjustmentWeight: adjustment?.ADJWEIGHT || 0,
       schemeAmount: scheme?.Amount || 0,
     };
   } catch (error) {
-    console.error("Scheme Summary Fetch Error:", error);
+    console.error("❌ Error in getSchemeSummaryData:", error);
     return {
-      adjustmentAmount: 0,
-      adjustmentWeight: 0,
       collectionAmount: 0,
       collectionWeight: 0,
+      adjustmentAmount: 0,
+      adjustmentWeight: 0,
       schemeAmount: 0,
     };
   }

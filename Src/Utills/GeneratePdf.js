@@ -9,12 +9,7 @@ import { getSummaryData } from "../Contexts/Summary/SummaryContext";
 import { getCancelBillData } from "../Contexts/CancelBill/CancelBillContext";
 import { getSchemeSummaryData } from "../Contexts/SchemeAdjustment/SchemeAdjustmentContext";
 
-export const generatePDFReport = async ({ startDate, endDate, costIds }) => {
-  if (!costIds.length) {
-    Alert.alert("Please select cost centres first");
-    return;
-  }
-
+export const generatePDFReport = async ({ startDate, endDate }) => {
   const format = (num) =>
     Number(num).toLocaleString("en-IN", {
       minimumFractionDigits: 2,
@@ -24,200 +19,149 @@ export const generatePDFReport = async ({ startDate, endDate, costIds }) => {
   try {
     const dateTime = new Date().toLocaleString("en-IN");
 
-    let html = `
-    <html>
-    <head>
-      <meta charset="utf-8" />
-      <style>
-        @page {
-          size: A4;
-          margin: 20mm;
-        }
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 0;
-          background: #fff;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 20px;
-          padding-bottom: 10px;
-          border-bottom: 2px solid #d4af37;
-        }
-        .company-name {
-          font-size: 24px;
-          font-weight: bold;
-          color: #d4af37;
-        }
-        .report-title {
-          font-size: 16px;
-          color: #444;
-        }
-        .report-dates {
-          font-size: 13px;
-          color: #777;
-        }
-        .section-title {
-          font-size: 16px;
-          font-weight: bold;
-          color: #333;
-          margin: 24px 0 10px;
-        }
-        .cost-center {
-          font-size: 18px;
-          font-weight: bold;
-          margin-top: 20px;
-          color: #000;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 18px;
-        }
-        th, td {
-          border: 1px solid #ccc;
-          padding: 8px;
-          font-size: 12px;
-          text-align: left;
-        }
-        th {
-          background-color: #f9f1cd;
-        }
-        .right {
-          text-align: right;
-        }
-        .total-row {
-          font-weight: bold;
-          background-color: #fff9e6;
-        }
-        footer {
-          text-align: center;
-          font-size: 10px;
-          margin-top: 30px;
-          color: #888;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div class="company-name">JAIGURU JEWELLERS</div>
-        <div class="report-title">Sales Summary Report</div>
-        <div class="report-dates">From ${startDate} to ${endDate} | Generated on: ${dateTime}</div>
-      </div>
-    `;
+    const [mat, pay, scheme, sum, cancels, schemeSummary] = await Promise.all([
+      getMaterialTableData({ startDate, endDate }),
+      getPaymentData({ startDate, endDate }),
+      getSchemeData({ startDate, endDate }),
+      getSummaryData({ startDate, endDate }),
+      getCancelBillData({ startDate, endDate }),
+      getSchemeSummaryData({ startDate, endDate }),
+    ]);
 
-    for (const { id: costId, name: COSTNAME } of costIds) {
-      const [mat, pay, scheme, sum, cancels, schemeSummary] = await Promise.all([
-        getMaterialTableData({ startDate, endDate, costId }),
-        getPaymentData({ startDate, endDate, costId }),
-        getSchemeData({ startDate, endDate, costId }),
-        getSummaryData({ startDate, endDate, costId }),
-        getCancelBillData({ startDate, endDate, costId }),
-        getSchemeSummaryData({ startDate, endDate, costId }),
-      ]);
+    const totalCancelAmt = cancels.reduce((sum, c) => sum + parseFloat(c.AMOUNT || 0), 0);
 
-      const totalCancelAmt = cancels.reduce((sum, c) => sum + parseFloat(c.AMOUNT || 0), 0);
+    const html = `
+    <html lang="en" dir="ltr">
+      <head>
+        <meta charset="utf-8" />
+        <style>
+          @page { size: A4; margin: 20mm; }
+          body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+          .header { text-align: center; border-bottom: 2px solid #d4af37; padding-bottom: 12px; }
+          .title { font-size: 22px; font-weight: bold; color: #d4af37; }
+          .subtitle { font-size: 14px; color: #666; margin-top: 4px; }
+          .section { margin: 24px 0 10px; font-size: 16px; font-weight: bold; color: #333; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; direction: ltr; }
+          th, td { border: 1px solid #ccc; padding: 6px; font-size: 12px; }
+          th { background: #f0e68c; text-align: left; }
+          td.num { text-align: right; }
+          td.text { text-align: left; }
+          .total { font-weight: bold; background: #fff8dc; }
+          .center { text-align: center; }
+          footer { text-align: center; font-size: 10px; margin-top: 30px; color: #888; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="title">Vairamaaligai JEWELLERS</div>
+          <div class="subtitle">Sales Summary Report</div>
+          <div class="subtitle">From ${startDate} to ${endDate} | Generated on: ${dateTime}</div>
+        </div>
 
-      html += `
-        <div class="cost-center">${COSTNAME}</div>
-
-        <div class="section-title">Material Summary</div>
+        <div class="section">Material Summary</div>
         <table>
-          <tr><th>Material</th><th class="right">Sales (G)</th><th class="right">Purchase (G)</th><th class="right">Stock (G)</th></tr>
-          <tr><td>Gold</td><td class="right">${format(mat.goldWeight)}</td><td class="right">${format(mat.Oldgold)}</td><td class="right">${format(mat.goldStock)}</td></tr>
-          <tr><td>Silver</td><td class="right">${format(mat.silverWeight)}</td><td class="right">${format(mat.OldSilver)}</td><td class="right">${format(mat.silverStock)}</td></tr>
+          <tr>
+            <th>Material</th><th class="num">Sales (G)</th><th class="num">Purchase (G)</th><th class="num">Stock (G)</th>
+          </tr>
+          <tr>
+            <td class="text">Gold</td><td class="num">${format(mat.goldWeight)}</td><td class="num">${format(mat.oldGold)}</td><td class="num">${format(mat.goldStock)}</td>
+          </tr>
+          <tr>
+            <td class="text">Silver</td><td class="num">${format(mat.silverWeight)}</td><td class="num">${format(mat.oldSilver)}</td><td class="num">${format(mat.silverStock)}</td>
+          </tr>
         </table>
 
-        <div class="section-title">Stone Summary</div>
+        <div class="section">Stone Summary</div>
         <table>
-          <tr><th>Stone Unit</th><th class="right">Stone Pcs</th><th class="right">Stone Wt</th><th class="right">Stone Amt (₹)</th></tr>
+          <tr><th>Unit</th><th class="num">Pieces</th><th class="num">Weight</th><th class="num">Amount (₹)</th></tr>
           ${
-            mat.StoneSummary?.length
-              ? mat.StoneSummary.map(
-                  (i) => `
+            mat.stoneSummary.length
+              ? mat.stoneSummary.map((i) => `
                   <tr>
-                    <td>${i.stoneUnit}</td><td class="right">${i.stnpcs}</td>
-                    <td class="right">${format(i.stnwt)}</td><td class="right">${format(i.stnamt)}</td>
-                  </tr>`
-                ).join("")
-              : `<tr><td colspan="4">No stone data</td></tr>`
+                    <td class="text">${i.stoneUnit}</td>
+                    <td class="num">${i.stnpcs}</td>
+                    <td class="num">${format(i.stnwt)}</td>
+                    <td class="num">${format(i.stnamt)}</td>
+                  </tr>`).join("")
+              : `<tr><td colspan="4" class="center">No stone data</td></tr>`
           }
         </table>
 
-        <div class="section-title">Payment Summary</div>
+        <div class="section">Payment Summary</div>
         <table>
-          <tr><th>Mode</th><th class="right">Amount (₹)</th></tr>
-          <tr><td>Cash</td><td class="right">${format(pay.cash)}</td></tr>
-          <tr><td>Credit/Debit</td><td class="right">${format(pay.credit)}</td></tr>
-          <tr><td>UPI</td><td class="right">${format(pay.cheque)}</td></tr>
-          <tr><td>Cheque</td><td class="right">${format(pay.upi)}</td></tr>
-          <tr class="total-row"><td>Total</td><td class="right">${format(pay.total)}</td></tr>
+          <tr><th>Mode</th><th class="num">Amount (₹)</th></tr>
+          <tr><td class="text">Cash</td><td class="num">${format(pay.cash)}</td></tr>
+          <tr><td class="text">Card</td><td class="num">${format(pay.credit)}</td></tr>
+          <tr><td class="text">UPI/Cheque</td><td class="num">${format(pay.chequeAndUPI)}</td></tr>
+          <tr class="total"><td class="text">Total</td><td class="num">${format(pay.total)}</td></tr>
         </table>
 
-        <div class="section-title">Scheme Collection</div>
+        <div class="section">Scheme Collection</div>
         <table>
-          <tr><th>Mode</th><th class="right">Amount (₹)</th></tr>
-          <tr><td>Cash</td><td class="right">${format(scheme.schemeCash)}</td></tr>
-          <tr><td>Card</td><td class="right">${format(scheme.schemeCard)}</td></tr>
-          <tr><td>UPI</td><td class="right">${format(scheme.schemeUpi)}</td></tr>
-          <tr class="total-row"><td>Total</td><td class="right">${format(scheme.schemeCash + scheme.schemeCard + scheme.schemeUpi)}</td></tr>
+          <tr><th>Mode</th><th class="num">Amount (₹)</th></tr>
+          <tr><td class="text">Cash</td><td class="num">${format(scheme.schemeCash)}</td></tr>
+          <tr><td class="text">Card</td><td class="num">${format(scheme.schemeCard)}</td></tr>
+          <tr><td class="text">UPI</td><td class="num">${format(scheme.schemeUpi)}</td></tr>
+          <tr class="total"><td class="text">Total</td><td class="num">${format(scheme.schemeCash + scheme.schemeCard + scheme.schemeUpi)}</td></tr>
         </table>
 
-        <div class="section-title">Estimate vs Billed</div>
+        <div class="section">Estimate vs Billed</div>
         <table>
-          <tr><th>Description</th><th class="right">Amount (₹)</th></tr>
-          <tr><td>Total Estimate</td><td class="right">${format(sum.TotalEstimate)}</td></tr>
-          <tr><td>Total Billed</td><td class="right">${format(sum.TotalBilled)}</td></tr>
-          <tr><td>Total Pending</td><td class="right">${format(sum.TotalPending)}</td></tr>
+          <tr><th>Type</th><th class="num">Amount (₹)</th></tr>
+          <tr><td class="text">Total Estimate</td><td class="num">${format(sum.TotalEstimate)}</td></tr>
+          <tr><td class="text">Total Billed</td><td class="num">${format(sum.TotalBilled)}</td></tr>
+          <tr><td class="text">Total Pending</td><td class="num">${format(sum.TotalPending)}</td></tr>
         </table>
 
-        <div class="section-title">Scheme Adjustment Summary</div>
+        <div class="section">Scheme Adjustment Summary</div>
         <table>
-          <tr><th>Description</th><th class="right">Value</th></tr>
-          <tr><td>Collection Weight</td><td class="right">${format(schemeSummary.collectionWeight)} G</td></tr>
-          <tr><td>Collection Amount</td><td class="right">${format(schemeSummary.collectionAmount)}</td></tr>
-          <tr><td>Adjustment Weight</td><td class="right">${format(schemeSummary.adjustmentWeight)} G</td></tr>
-          <tr><td>Adjustment Amount</td><td class="right">${format(schemeSummary.adjustmentAmount)}</td></tr>
-          <tr><td>Scheme Amount</td><td class="right">${format(schemeSummary.schemeAmount)}</td></tr>
+          <tr><th>Description</th><th class="num">Value</th></tr>
+          <tr><td class="text">Collection Weight</td><td class="num">${format(schemeSummary.collectionWeight)} G</td></tr>
+          <tr><td class="text">Collection Amount</td><td class="num">${format(schemeSummary.collectionAmount)}</td></tr>
+          <tr><td class="text">Adjustment Weight</td><td class="num">${format(schemeSummary.adjustmentWeight)} G</td></tr>
+          <tr><td class="text">Adjustment Amount</td><td class="num">${format(schemeSummary.adjustmentAmount)}</td></tr>
+          <tr><td class="text">Scheme Amount</td><td class="num">${format(schemeSummary.schemeAmount)}</td></tr>
         </table>
 
-        <div class="section-title">Cancelled Bills</div>
+        <div class="section">Cancelled Bills</div>
         <table>
-          <tr><th>Date</th><th>Bill No</th><th class="right">Net Wt</th><th class="right">Amount</th><th>User</th></tr>
+          <tr><th>Date</th><th>Tranno</th><th class="num">Net Wt</th><th class="num">Amount</th><th>User</th></tr>
           ${
             cancels.length
               ? cancels.map((c) => `
-                <tr>
-                  <td>${c.TRANDATE || "-"}</td><td>${c.TRANNO || "-"}</td>
-                  <td class="right">${parseFloat(c.NETWT || 0).toFixed(3)}</td>
-                  <td class="right">${format(c.AMOUNT || 0)}</td>
-                  <td>${c.USERNAME || "-"}</td>
-                </tr>`).join("")
-              : `<tr><td colspan="5">No cancelled bills</td></tr>`
+                  <tr>
+                    <td class="text">${c.TRANDATE || "-"}</td>
+                    <td class="text">${c.TRANNO || "-"}</td>
+                    <td class="num">${parseFloat(c.NETWT || 0).toFixed(3)}</td>
+                    <td class="num">${format(c.AMOUNT || 0)}</td>
+                    <td class="text">${c.USERNAME || "-"}</td>
+                  </tr>`).join("")
+              : `<tr><td colspan="5" class="center">No cancelled bills</td></tr>`
           }
           ${
             cancels.length
-              ? `<tr class="total-row"><td colspan="3">Total Cancelled</td><td colspan="2" class="right">${format(totalCancelAmt)}</td></tr>`
+              ? `<tr class="total"><td colspan="3" class="text">Total Cancelled</td><td colspan="2" class="num">${format(totalCancelAmt)}</td></tr>`
               : ""
           }
         </table>
-      `;
-    }
 
-    html += `
-        <footer>© JAIGURU Jewellers • Generated on ${dateTime}</footer>
+        <footer>©  Jewellers • Generated on ${dateTime}</footer>
       </body>
     </html>`;
 
     const { uri } = await Print.printToFileAsync({ html });
+
     if (!(await Sharing.isAvailableAsync())) {
-      Alert.alert("Sharing not available");
+      Alert.alert("Sharing not available on this device");
       return;
     }
-    await Sharing.shareAsync(uri);
+
+    await Sharing.shareAsync(uri,{
+      UTI: ".pdf",
+      mimeType: "application/pdf",
+    });
   } catch (e) {
     console.error("PDF generation failed:", e);
-    Alert.alert("PDF generation failed");
+    Alert.alert("Error", "Failed to generate PDF report.");
   }
 };

@@ -17,8 +17,7 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-    marginVertical: 5,
-    marginTop: 65,
+    marginVertical: 15,
   },
   buttonText: {
     fontSize: 16,

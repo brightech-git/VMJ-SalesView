@@ -96,7 +96,7 @@ const MPINVerifyScreen = () => {
         {/* ✅ Logo added here */}
         <Image
           source={logo}
-          style={{ width: 120, height: 120, resizeMode: "contain", alignSelf: "center", marginBottom: 10,marginTop:-150}}
+          style={{ width: 120, height: 120, resizeMode: "contain", alignSelf: "center", marginBottom: 10,marginTop:-150,borderRadius:60 }}
         />
 
         <Text style={styles.title}>Verify Your MPIN</Text>
@@ -115,14 +115,14 @@ const MPINVerifyScreen = () => {
           maxLength={6}
         />
 
-        {/* <View style={styles.forgotContainer}>
+        <View style={styles.forgotContainer}>
           <Text
             style={styles.linkText}
             onPress={() => navigation.navigate("ResetMpin")}
           >
             Forgot MPIN
           </Text>
-        </View> */}
+        </View>
 
         <TouchableOpacity
           style={[
@@ -137,7 +137,7 @@ const MPINVerifyScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        {/* <View style={styles.linkContainer}>
+        <View style={styles.linkContainer}>
           <Text style={styles.linkText1}>Don't have an MPIN?</Text>
           <Text
             style={styles.linkText2}
@@ -145,7 +145,7 @@ const MPINVerifyScreen = () => {
           >
             Click here
           </Text>
-        </View> */}
+        </View>
       </View>
       <FooterScreen />
     </>

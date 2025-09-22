@@ -1,6 +1,6 @@
 // src/Contexts/CostCentreContext.js
 import React, { createContext, useEffect, useState } from "react";
-import { Api_Base_url } from "../../Config/Config";
+import { Api_Base_url2 } from "../../Config/Config";
 
 export const CostCentreContext = createContext();
 
@@ -8,7 +8,7 @@ export const CostCentreProvider = ({ children }) => {
   const [costCentres, setCostCentres] = useState([]);
 
   useEffect(() => {
-    fetch(`${Api_Base_url}costCentres`)
+    fetch(`${Api_Base_url2}costCentres`)
       .then((res) => res.json())
       .then(setCostCentres)
       .catch((err) => console.error("Cost Centre fetch failed", err));

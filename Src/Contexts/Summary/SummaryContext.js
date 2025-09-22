@@ -1,8 +1,9 @@
+// ✅ File: Contexts/Summary/SummaryContext.js
 import { useState, useEffect } from 'react';
-import { Api_Base_url } from '../../Config/Config';
+import { Api_Base_url2 } from '../../Config/Config';
 
-// ✅ 1. React Hook for real-time data in components
-export function useSummaryData({ startDate, endDate, costId }) {
+// ✅ 1. Hook for components
+export function useSummaryData({ startDate, endDate }) {
   const [summary, setSummary] = useState({
     TotalEstimate: 0,
     TotalBilled: 0,
@@ -11,22 +12,26 @@ export function useSummaryData({ startDate, endDate, costId }) {
 
   useEffect(() => {
     let isMounted = true;
+    console.log(startDate)
 
     const fetchSummary = async () => {
       try {
-        const url = `${Api_Base_url}${costId}Summary?startDate=${startDate}&endDate=${endDate}&costId=${costId}`;
+        const url = `${Api_Base_url2}summary?startDate=${startDate}&endDate=${endDate}`;
         const response = await fetch(url);
         const data = await response.json();
+        console.log("SummaryCard",data)
+
+        if (__DEV__) console.log("📊 Summary data", data);
 
         if (isMounted && data) {
           setSummary({
-            TotalEstimate: data.TotalEstimate || 0,
-            TotalBilled: data.TotalBilled || 0,
-            TotalPending: data.TotalPending || 0,
+            TotalEstimate: data?.TotalEstimate || 0,
+            TotalBilled: data?.TotalBilled || 0,
+            TotalPending: data?.TotalPending || 0,
           });
         }
       } catch (error) {
-        console.error(`Error fetching summary for ${costId}:`, error);
+        console.error("❌ Error fetching summary:", error);
         if (isMounted) {
           setSummary({
             TotalEstimate: 0,
@@ -44,15 +49,15 @@ export function useSummaryData({ startDate, endDate, costId }) {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [startDate, endDate, costId]);
+  }, [startDate, endDate]);
 
   return summary;
 }
 
-// ✅ 2. Pure async function for use in non-UI files like PDF report
-export async function getSummaryData({ startDate, endDate, costId }) {
+// ✅ 2. For non-UI async use
+export async function getSummaryData({ startDate, endDate }) {
   try {
-    const url = `${Api_Base_url}${costId}Summary?startDate=${startDate}&endDate=${endDate}&costId=${costId}`;
+    const url = `${Api_Base_url2}summary?startDate=${startDate}&endDate=${endDate}`;
     const response = await fetch(url);
     const data = await response.json();
 
@@ -62,7 +67,7 @@ export async function getSummaryData({ startDate, endDate, costId }) {
       TotalPending: data?.TotalPending || 0,
     };
   } catch (error) {
-    console.error(`Error fetching summary for ${costId}:`, error);
+    console.error("❌ Error fetching summary:", error);
     return {
       TotalEstimate: 0,
       TotalBilled: 0,

@@ -1,17 +1,14 @@
-import React, { useEffect, useContext } from "react";
+// ✅ File: Components/Scheme/SchemeItemCard.js
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { formatIN } from "../../Config/Rupees";
 import { useSchemeData } from "../../Contexts/Scheme/SchemeContext";
-import { CostCentreContext } from "../../Contexts/CostCenter/CostCenterContext";
+import { formatIN } from "../../Config/Rupees";
 
-export default function SchemeItemCard({ costId, startDate, endDate, onData }) {
+export default function SchemeItemCard({ startDate, endDate, onData }) {
   const { schemeCash, schemeCard, schemeUpi } = useSchemeData({
     startDate,
     endDate,
-    costId,
   });
-
-  const { getCostName } = useContext(CostCentreContext);
 
   useEffect(() => {
     if (onData) {
@@ -25,11 +22,11 @@ export default function SchemeItemCard({ costId, startDate, endDate, onData }) {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{getCostName(costId)}</Text>
+      <Text style={styles.title}>Scheme Payments</Text>
 
       <View style={styles.table}>
         <View style={[styles.row, styles.headerRow]}>
-          <Text style={styles.fullCell}>SCHEME COLLECTIONS</Text>
+          <Text style={styles.fullCell}>PAYMENT MODE</Text>
         </View>
 
         <View style={styles.row}>

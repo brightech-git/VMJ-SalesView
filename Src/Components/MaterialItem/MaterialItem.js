@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,25 +10,23 @@ import {
 } from "react-native";
 import { formatINR } from "../../Config/Rupees";
 import { useMaterialTableData } from "../../Contexts/MaterialItems/MaterialContext";
-import { CostCentreContext } from "../../Contexts/CostCenter/CostCenterContext";
 
-export default function MaterialTableItem({ costId, startDate, endDate, onData }) {
+export default function MaterialTableItem({ startDate, endDate, onData }) {
   const {
     goldWeight,
-    Oldgold,
-    OldSilver,
+    oldGold,
+    oldSilver,
     silverWeight,
     goldStock,
     silverStock,
-    stncarat,
-    stngram,
-    StoneSummary,
-  } = useMaterialTableData({ startDate, endDate, costId });
+    stnCarat,
+    stnGram,
+    stoneSummary,
+  } = useMaterialTableData({ startDate, endDate });
 
   const [modalVisible, setModalVisible] = useState(false);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const slideAnim = useState(new Animated.Value(20))[0];
-  const { getCostName } = useContext(CostCentreContext);
 
   useEffect(() => {
     if (onData) {
@@ -37,24 +35,34 @@ export default function MaterialTableItem({ costId, startDate, endDate, onData }
           {
             material: "Gold",
             sales: goldWeight,
-            purchase: Oldgold,
+            purchase: oldGold,
             stock: goldStock,
           },
           {
             material: "Silver",
             sales: silverWeight,
-            purchase: OldSilver,
+            purchase: oldSilver,
             stock: silverStock,
           },
         ],
         stoneExtras: {
-          stncarat,
-          stngram,
-          StoneSummary,
+          stncarat: stnCarat,
+          stngram: stnGram,
+          StoneSummary: stoneSummary,
         },
       });
     }
-  }, [goldWeight, Oldgold, silverWeight, OldSilver, goldStock, silverStock]);
+  }, [
+    goldWeight,
+    oldGold,
+    silverWeight,
+    oldSilver,
+    goldStock,
+    silverStock,
+    stnCarat,
+    stnGram,
+    stoneSummary,
+  ]);
 
   const showModal = () => setModalVisible(true);
 
@@ -92,7 +100,7 @@ export default function MaterialTableItem({ costId, startDate, endDate, onData }
 
   return (
     <View style={styles.table}>
-      <Text style={styles.heading}>{getCostName(costId)}</Text>
+      <Text style={styles.heading}>Material Summary</Text>
 
       <View style={styles.headerRow}>
         <View style={styles.leftCell}>
@@ -105,6 +113,7 @@ export default function MaterialTableItem({ costId, startDate, endDate, onData }
         </View>
       </View>
 
+      {/* Gold Row */}
       <View style={styles.row}>
         <View style={styles.leftCell}>
           <Text style={styles.firstCelll}>Gold</Text>
@@ -112,33 +121,35 @@ export default function MaterialTableItem({ costId, startDate, endDate, onData }
         <View style={styles.rightSection}>
           <Text style={styles.centercell}>
             {formatINR(goldWeight)}
-            {(stncarat !== 0 || stngram !== 0) && (
+            {(stnCarat !== 0 || stnGram !== 0) && (
               <TouchableOpacity onPress={showModal}>
-                {stncarat !== 0 && (
-                  <Text style={styles.colorcell}> +{formatINR(stncarat)}C</Text>
+                {stnCarat !== 0 && (
+                  <Text style={styles.colorcell}> +{formatINR(stnCarat)}C</Text>
                 )}
-                {stngram !== 0 && (
-                  <Text style={styles.colorcell}> +{formatINR(stngram)}G</Text>
+                {stnGram !== 0 && (
+                  <Text style={styles.colorcell}> +{formatINR(stnGram)}G</Text>
                 )}
               </TouchableOpacity>
             )}
           </Text>
-          <Text style={styles.centercell}>{formatINR(Oldgold)}</Text>
+          <Text style={styles.centercell}>{formatINR(oldGold)}</Text>
           <Text style={styles.centercell}>{formatINR(goldStock)}</Text>
         </View>
       </View>
 
+      {/* Silver Row */}
       <View style={styles.row}>
         <View style={styles.leftCell}>
           <Text style={styles.firstCelll}>Silver</Text>
         </View>
         <View style={styles.rightSection}>
           <Text style={styles.centercell}>{formatINR(silverWeight)}</Text>
-          <Text style={styles.centercell}>{formatINR(OldSilver)}</Text>
+          <Text style={styles.centercell}>{formatINR(oldSilver)}</Text>
           <Text style={styles.centercell}>{formatINR(silverStock)}</Text>
         </View>
       </View>
 
+      {/* Modal for Stone Summary */}
       <Modal transparent visible={modalVisible} animationType="none">
         <View style={styles.modalOverlay}>
           <Animated.View
@@ -159,8 +170,8 @@ export default function MaterialTableItem({ costId, startDate, endDate, onData }
               <Text style={[styles.cell, styles.headerText]}>Stone Amt</Text>
             </View>
 
-            {StoneSummary?.length > 0 ? (
-              StoneSummary.map((item, index) => (
+            {stoneSummary?.length > 0 ? (
+              stoneSummary.map((item, index) => (
                 <View key={index} style={styles.tableRow}>
                   <Text style={styles.cell}>{item.stoneUnit}</Text>
                   <Text style={styles.cell}>{item.stnpcs}</Text>
@@ -181,6 +192,7 @@ export default function MaterialTableItem({ costId, startDate, endDate, onData }
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   table: {
     marginBottom: 16,
@@ -192,7 +204,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 3,
-    marginHorizontal: 10,
   },
   heading: {
     backgroundColor: "#C0C0C0",

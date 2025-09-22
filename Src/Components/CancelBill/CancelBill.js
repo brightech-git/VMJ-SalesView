@@ -1,29 +1,26 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   FlatList,
   ActivityIndicator,
   StyleSheet,
-  TouchableOpacity,
   I18nManager,
 } from "react-native";
 import { useCancelBillData } from "../../Contexts/CancelBill/CancelBillContext";
-import { CostCentreContext } from "../../Contexts/CostCenter/CostCenterContext";
 
-export default function CancelBillItem({ startDate, endDate, costId, onData }) {
-  const { data, loading } = useCancelBillData({ startDate, endDate, costId });
-  const { getCostName } = useContext(CostCentreContext);
+export default function CancelBillItem({ startDate, endDate, onData }) {
+  const { data, loading } = useCancelBillData({ startDate, endDate });
 
   useEffect(() => {
     if (onData && Array.isArray(data)) {
-      onData({ costId, data });
+      onData({ data });
     }
   }, [data]);
 
   const renderHeader = () => (
     <View>
-      <Text style={styles.sectionTitle}>{getCostName(costId)}</Text>
+      <Text style={styles.sectionTitle}>Cancelled Bills</Text>
       <View style={[styles.row, styles.headerRow]}>
         <Text style={styles.cell1}>Date</Text>
         <Text style={styles.cell1}>Tranno</Text>
@@ -38,12 +35,8 @@ export default function CancelBillItem({ startDate, endDate, costId, onData }) {
     <View style={styles.row}>
       <Text style={styles.cell}>{item.TRANDATE}</Text>
       <Text style={styles.cell}>{item.TRANNO}</Text>
-      <Text style={styles.cell}>
-        {parseFloat(item.NETWT || 0).toFixed(3)}
-      </Text>
-      <Text style={styles.cell}>
-        ₹{parseFloat(item.AMOUNT || 0).toFixed(2)}
-      </Text>
+      <Text style={styles.cell}>{parseFloat(item.NETWT || 0).toFixed(3)}</Text>
+      <Text style={styles.cell}>₹{parseFloat(item.AMOUNT || 0).toFixed(2)}</Text>
       <Text style={styles.cell}>{item.USERNAME}</Text>
     </View>
   );
@@ -57,13 +50,12 @@ export default function CancelBillItem({ startDate, endDate, costId, onData }) {
   return (
     <View style={styles.container}>
       {renderHeader()}
-
       <FlatList
         data={data}
         scrollEnabled={false}
         renderItem={renderItem}
         keyExtractor={(item, index) =>
-          `${costId}-${item.TRANNO || "no-tran"}-${index}`
+          `${item.TRANNO || "no-tran"}-${index}`
         }
         ListEmptyComponent={
           <Text style={styles.emptyText}>No cancelled bills found.</Text>
@@ -77,7 +69,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     marginBottom: 30,
-    marginHorizontal: 10,
+    marginHorizontal: 5,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,

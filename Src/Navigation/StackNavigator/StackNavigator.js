@@ -24,42 +24,32 @@ const Stack = createNativeStackNavigator();
 export default function StackNavigator() {
   const [initialRoute, setInitialRoute] = useState(null);
 
-useEffect(() => {
-  const checkLaunchStatus = async () => {
-    try {
-      // await AsyncStorage.removeItem("isFirstLaunch");
-      // await AsyncStorage.removeItem("mpinVerified");
-      // await AsyncStorage.removeItem("mpinCreated");
+  useEffect(() => {
+    const checkLaunchStatus = async () => {
+      try {
+        // await AsyncStorage.removeItem("isFirstLaunch");
+        // await AsyncStorage.removeItem("mpinVerified");
 
-      const isFirstLaunch = await AsyncStorage.getItem("isFirstLaunch");
-      const mpinCreated = await AsyncStorage.getItem("mpinCreated"); // store when MPIN is created
-      const mpinVerified = await AsyncStorage.getItem("mpinVerified"); // store when MPIN is verified
+        const isFirstLaunch = await AsyncStorage.getItem("isFirstLaunch");
+        const mpinVerified = await AsyncStorage.getItem("mpinVerified");
 
-      if (isFirstLaunch === null) {
-        // First launch ever → Onboarding
-        await AsyncStorage.setItem("isFirstLaunch", "false");
-        setInitialRoute("Onboarding");
-      } else if (!mpinCreated) {
-        // No MPIN created yet → go to Login
-        setInitialRoute("Login");
-      } else if (mpinCreated && mpinVerified !== "true") {
-        // MPIN exists but not verified → Verify MPIN
-        setInitialRoute("VerifyMpin");
-      } else if (mpinCreated && mpinVerified === "true") {
-        // MPIN created and verified → Home
-        setInitialRoute("Home");
-      } else {
-        // Fallback
-        setInitialRoute("Login");
+        if (isFirstLaunch === null) {
+          // First launch ever
+          await AsyncStorage.setItem("isFirstLaunch", "false");
+          setInitialRoute("Onboarding");
+        } else {
+          // Not first launch, but MPIN not verified
+          setInitialRoute("VerifyMpin");
+        }
+      } catch (error) {
+        console.error("Launch check error:", error);
+        setInitialRoute("Login"); // Fallback
       }
-    } catch (error) {
-      console.error("Launch check error:", error);
-      setInitialRoute("Login"); // Fallback
-    }
-  };
+    };
 
-  checkLaunchStatus();
-}, []);
+    checkLaunchStatus();
+  }, []);
+
   if (!initialRoute) return null; // or show Splash screen
 
   return (
@@ -85,6 +75,11 @@ useEffect(() => {
           <Stack.Screen
             name="VerifyMpin"
             component={VerifyMpin}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ResetMpin"
+            component={ResetMpinScreen}
             options={{ headerShown: false }}
           />
           <Stack.Screen
